@@ -3,15 +3,17 @@ import chess
 import chess.svg
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel
+from PyQt5.QtCore import pyqtSignal
 
 class MainWindow(QWidget):
+    
+    moveMade = pyqtSignal()
     def __init__(self):
         super().__init__()
         self.setWindowTitle('PyChess')
         self.setGeometry(100, 100, 800, 850)
         self.chessboard = chess.Board()
         self.move_history = []
-
         self.setup_ui()
 
     def setup_ui(self):
@@ -41,6 +43,7 @@ class MainWindow(QWidget):
             self.moveEntry.clear()
             self.move_history.append(move_uci)
             self.statusLabel.setText(f"Last move: {move_uci} - {self.game_status()}")
+            self.moveMade.emit()  # Emit signal when move is successfully made
 
     def make_move(self, move_uci):
         try:
@@ -51,6 +54,8 @@ class MainWindow(QWidget):
                 return True
             else:
                 self.statusLabel.setText("Illegal move. Please try again.")
+                for move in self.chessboard.legal_moves:
+                    print(move)
                 return False
         except ValueError:
             self.statusLabel.setText("Invalid move format. Please try again.")
